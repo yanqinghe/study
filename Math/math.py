@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -129,7 +130,6 @@ def question1():
     yyArray = ni(xxArray,x,y)
     #printArrayASJson(xxArray,yyArray)
 
-    print(np.array(y))
     plt.figure(figsize=(8,4))
     plt.plot(np.array(xxArray),np.array(yyArray),label="$ni$",color="green")
     plt.plot(np.array(x),np.array(y),'*',label="$data$",color="red")
@@ -137,4 +137,19 @@ def question1():
     plt.legend()
     plt.show()
 
-question1()
+def question2():
+    x=range(0,25)
+    y=[15,14,14,14,14,15,16,18,20,20,23,25,28,31,34,31,29,27,25,24,22,20,18,17,16]
+    plt.figure(figsize=(8,4))
+    plt.plot(np.array(x),np.array(y),'*',label="$data$",color="red")
+    plt.ylim(10,40)
+    plt.legend()
+    plt.show()
+
+
+def lss():
+    """形成矩阵"""
+
+
+# question1()
+question2()
