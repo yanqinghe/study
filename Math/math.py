@@ -2,7 +2,7 @@
 # import numpy as np
 # import matplotlib.pyplot as plt
 import binascii
-
+import struct
 def dd(tup_x, tup_y):
     n = len(tup_x)
     m=[0]*n
@@ -35,6 +35,7 @@ def tss(a, b, c, d, n, x):
     y = [0] * n
     l = [0] * n
     u[0] = b[0]
+    y[0]=d[0]
     for k in range(1, n):
         l[k] = a[k] / u[k - 1];
         u[k] = b[k] - l[k] * c[k - 1]
@@ -130,15 +131,16 @@ def question1():
 
     yyArray = evaspline(xxArray,x,y)
     printArrayASJson(xxArray,yyArray)
-    # yyArray = ni(xxArray,x,y)
+    yyArray2 = ni(xxArray,x,y)
     # printArrayASJson(xxArray,yyArray)
-    # #
-    # plt.figure(figsize=(8,4))
-    # plt.plot(np.array(xxArray),np.array(yyArray),label="$ni$",color="green")
-    # plt.plot(np.array(x),np.array(y),'*',label="$data$",color="red")
-    # plt.ylim(0,20)
-    # plt.legend()
-    # plt.show()
+    #
+    plt.figure(figsize=(8,4))
+    plt.plot(np.array(xxArray),np.array(yyArray),label="$yangtiao$",color="blue")
+    plt.plot(np.array(xxArray),np.array(yyArray2),label="$duoxiangs$",color="red")
+    plt.plot(np.array(x),np.array(y),'*',label="$data$",color="black")
+    plt.ylim(0,20)
+    plt.legend()
+    plt.show()
 
 def lss():
     """形成矩阵"""
@@ -150,21 +152,59 @@ def question2():
     plt.ylim(10,40)
     plt.legend()
     plt.show()
+def printDataInfo(path):
+    print ("文件路径",path)
+    f = open(path, "rb")
+    m = 8
+    #矩阵文件头的个数
+    # 读取文件头
+    fhead = f.read(4*5)
+    # hexstr = binascii.b2a_hex(fhead)  #得到一个16进制的数
+    a=struct.unpack("IIIII",fhead)
+    print ("文件标识符",hex(a[0]))
+    print ("数据文件版本号",hex(a[1]))
+    print ("矩阵描述部分")
+    print ("方程阶数",a[2])
+    print ("带状矩阵上带宽",a[3])
+    print ("带状矩阵下带宽",a[4])
+    print ("------------------")
+    # f.seek(0,3)
+    fbody=f.read(4)
+    count =0
+    ma=[[] for i in range(a[2])]
+    j=k=0
+    while j<=(a[2]-1):
+        count += 1
+        s=struct.unpack("f",fbody)
+        ma[j].append(s)
+        fbody=f.read(4)
+        k+=1
+        if(k==(a[2])):
+            k=0
+            j+=1
+    print (count)
+    for max in ma:
+        print(max)
+    # byte=basestring(fbody)
+    # hexstr = binascii.b2a_hex(fbody)  #得到一个16进制的数
+    # print (byte)# #
+    #
+def gauss(a):
 
 def question3():
-    path = "C:/Users/hehe/Desktop/2016上机题目/dat61.dat"
+    # 选择数据文件
+    pathArray = ["dat61.dat"]
+    for path in pathArray:
+        printDataInfo(path)
 
-    fh = open(path, "rb")
-    fhead = fh.read(10)
-    hexstr = binascii.b2a_hex(fhead)  #得到一个16进制的数
-    print ('fhead: ',hexstr, type(hexstr))
+    # 读取数据文件
 
-    a = fh.read()
-    #print 'raw: ',`a`,type(a)
-    hexstr = binascii.b2a_hex(a)  #得到一个16进制的数
-    print ('hex: ',hexstr, type(hexstr))
-    bsstr = bin(int(hexstr,16))[2:]
-    print('bin: ',bsstr, type(bsstr))
+    # a = fh.read()
+    # print 'raw: ',`a`,type(a)
+    #hexstr = binascii.b2a_hex(a)  #得到一个16进制的数
+    # print ('hex: ',hexstr, type(hexstr))
+    # bsstr = bin(int(hexstr,16))[2:]
+    # print('bin: ',bsstr, type(bsstr))
 
 
 
