@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-import matplotlib.pyplot as plt
+# import numpy as np
+# import matplotlib.pyplot as plt
+import binascii
 
 def dd(tup_x, tup_y):
     n = len(tup_x)
     m=[0]*n
-    for i in range(0, n):
-        m[i] = tup_y[i];
+    m=tup_y[:]
     for i in range(1, n):
         j = n - 1;
         while j >= i:
             m[j] = (m[j] - m[j - 1]) / (tup_x[j] - tup_x[j - i])
             j -= 1
+            print(m[j],i,j)
     return m
 
 
@@ -34,7 +35,6 @@ def tss(a, b, c, d, n, x):
     y = [0] * n
     l = [0] * n
     u[0] = b[0]
-    y[0] = d[0]
     for k in range(1, n):
         l[k] = a[k] / u[k - 1];
         u[k] = b[k] - l[k] * c[k - 1]
@@ -51,7 +51,7 @@ def find_k(x, _x):
 
     n = len(x)
     for i in range(0, n - 1):
-        if (_x <= x[i]):
+        if (_x < x[i]):
             return i
     return -1
 
@@ -59,18 +59,22 @@ def find_k(x, _x):
 def splinem(x, y, lambda_0, d_0, u_n, d_n):
 
     n = len(x);
-    M = [0] * (n);
-    h = [0] * (n + 1)
-    a = [0] * (n)
-    b = [0] * (n)
-    c = [0] * (n)
-    for i in range(0, n):
-        M[i] = y[i];
-    for k in range(1, 3):
-        i = n - 1;
-        while (i > (k-1)):
-            M[i] = (M[i] - M[i - 1]) / (x[i] - x[i - 1])
-            i -= 1
+    M = [1] * (n);
+    h = [1] * (n + 1)
+    a = [1] * (n)
+    b = [1] * (n)
+    c = [1] * (n)
+    M=y[:]
+    # for k in range(1, 3):
+    #     i = n - 1;
+    #     while (i >=k):
+    #         M[i] = (M[i] - M[i - 1]) / (x[i] - x[i - k])
+    #         i -= 1
+    for i in range(1, 3):
+        j = n - 1;
+        while j >= i:
+            M[j] = (M[j] - M[j - 1]) / (x[j] - x[j - i])
+            j -= 1
     h[1] = x[1] - x[0]
     for i in range(1, n - 1):
         h[i + 1] = x[i + 1] - x[i]
@@ -91,8 +95,8 @@ def splinem(x, y, lambda_0, d_0, u_n, d_n):
 
 def evaspline(xxArray,tup_x,tup_y):
     # printArrayASJson(tup_x[xx],tup_y[xx])
-    M = splinem(tup_x, tup_y, 0.5, 0, 0.5, 0)
-    # M = splinem(tup_x, tup_y, -2, 4.02, -2, -1.8)
+    #M = splinem(tup_x, tup_y, 0.5, 0, 0.5, 0)
+    M = splinem(tup_x, tup_y, -2, -0.0392, -2, -0.018)
     yyArray=[]
     for xx in xxArray:
         yy=0
@@ -100,8 +104,7 @@ def evaspline(xxArray,tup_x,tup_y):
         h = tup_x[k] - tup_x[k - 1]
         xbar = tup_x[k] - xx
         xdian = xx - tup_x[k - 1]
-        yy = (M[k - 1] * (xbar ** 3) / 6 + M[k] * (xdian ** 3)/6 + (tup_y[k - 1] * M[k - 1] * (h ** 2) / 6) * xbar + (
-        tup_y[k] - (M[k] * h ** 2 )/ 6) * xdian) / h
+        yy = (M[k - 1] * (xbar ** 3) / 6 + M[k] * (xdian ** 3)/6 + (tup_y[k - 1] - M[k - 1] * (h ** 2) / 6) * xbar + (tup_y[k] - (M[k] * h ** 2 )/ 6) * xdian) / h
 
         yyArray.append(yy)
     return yyArray
@@ -116,7 +119,7 @@ def question1():
 
     y = [9.01, 8.96, 7.96, 7.97, 8.02, 9.05, 10.13, 11.18, 12.26, 13.28, 13.32, 12.61, 11.29, 10.22, 9.15, 7.90,
                  7.95, 8.86, 9.81, 10.80, 10.93]
-    x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    x = range(0,21)
     printArrayASJson(x,y)
 
     xx=0
@@ -126,17 +129,19 @@ def question1():
         xx+=0.01
 
     yyArray = evaspline(xxArray,x,y)
+    printArrayASJson(xxArray,yyArray)
+    # yyArray = ni(xxArray,x,y)
+    # printArrayASJson(xxArray,yyArray)
+    # #
+    # plt.figure(figsize=(8,4))
+    # plt.plot(np.array(xxArray),np.array(yyArray),label="$ni$",color="green")
+    # plt.plot(np.array(x),np.array(y),'*',label="$data$",color="red")
+    # plt.ylim(0,20)
+    # plt.legend()
+    # plt.show()
 
-    yyArray = ni(xxArray,x,y)
-    #printArrayASJson(xxArray,yyArray)
-
-    plt.figure(figsize=(8,4))
-    plt.plot(np.array(xxArray),np.array(yyArray),label="$ni$",color="green")
-    plt.plot(np.array(x),np.array(y),'*',label="$data$",color="red")
-    plt.ylim(0,20)
-    plt.legend()
-    plt.show()
-
+def lss():
+    """形成矩阵"""
 def question2():
     x=range(0,25)
     y=[15,14,14,14,14,15,16,18,20,20,23,25,28,31,34,31,29,27,25,24,22,20,18,17,16]
@@ -146,10 +151,23 @@ def question2():
     plt.legend()
     plt.show()
 
+def question3():
+    path = "C:/Users/hehe/Desktop/2016上机题目/dat61.dat"
 
-def lss():
-    """形成矩阵"""
+    fh = open(path, "rb")
+    fhead = fh.read(10)
+    hexstr = binascii.b2a_hex(fhead)  #得到一个16进制的数
+    print ('fhead: ',hexstr, type(hexstr))
+
+    a = fh.read()
+    #print 'raw: ',`a`,type(a)
+    hexstr = binascii.b2a_hex(a)  #得到一个16进制的数
+    print ('hex: ',hexstr, type(hexstr))
+    bsstr = bin(int(hexstr,16))[2:]
+    print('bin: ',bsstr, type(bsstr))
+
 
 
 # question1()
-question2()
+# question2()
+question3()
