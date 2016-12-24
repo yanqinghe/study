@@ -167,73 +167,250 @@ def printDataInfo (path):
     fhead = f.read(4 * 5)
     # hexstr = binascii.b2a_hex(fhead)  #得到一个16进制的数
     a = struct.unpack("IIIII", fhead)
-    print ("文件标识符", hex(a[0]))
-    print ("数据文件版本号", hex(a[1]))
-    print ("矩阵描述部分")
-    print ("方程阶数", a[2])
-    print ("带状矩阵上带宽", a[3])
-    print ("带状矩阵下带宽", a[4])
+    id=hex(a[0])
+    version=hex(a[1])
+    n=a[2]
+    q=a[3]
+    p=a[4]
+    print ("文件标识部分-------------")
+    print ("文件标识符", id)
+    print ("数据文件版本号",version)
+    print ("矩阵描述部分-------------")
+    print ("方程阶数", n)
+    print ("带状矩阵上带宽", q)
+    print ("带状矩阵下带宽", p)
     print ("------------------")
     # f.seek(0,3)
-    fbody = f.read(4)
-    count = 0
-    ma = [[] for i in range(a[2])]
-    j = k = 0
-    while j <= (a[2] - 1):
-        count += 1
-        s = struct.unpack("f", fbody)
-        ma[j].append(s[0])
-        fbody = f.read(4)
-        k += 1
-        if (k == (a[2])):
-            k = 0
-            j += 1
-    print (count)
-    fbody2 =f.read(4)
-    j=0
-    while j<(a[2]-1):
-        s=struct.unpack("f",fbody2)
-        ma[j].append(s[0])
-        fbody2 =f.read(4)
-        j+=1
-    if(f.read()):
-        print ("数据没有用完")
-    for maaa in ma:
-        print(maaa)
-        # byte=basestring(fbody)
-        # hexstr = binascii.b2a_hex(fbody)  #得到一个16进制的数
-        # print (byte)# #
-        #
-    gaussPP(ma)
 
-def gaussPP (aa):
+
+
+    if(version=='0x102'):
+        count = 0
+        ma = [[] for i in range(a[2])]
+        j = k = 0
+        while j <= (n - 1):
+            fbody = f.read(4)
+            count += 1
+            s = struct.unpack("f", fbody)
+            ma[j].append(s[0])
+            k += 1
+            if (k == (a[2])):
+                k = 0
+                j += 1
+        print (count)
+        j=0
+        b=[0]*a[2]
+        while j<(a[2]):
+            fbody2 =f.read(4)
+            s=struct.unpack("f",fbody2)
+            b[j]=s[0]
+            j+=1
+        if(f.read(4)):
+            print ("数据没有用完")
+        else:
+            print ("数据已经用完")
+        #gaussPP(ma,b,p,q,version)
+        #choleskyb(ma,n,q,p,b)
+    if(version=="0x202"):
+        print ("矩阵为压缩带状矩阵")
+        count = 0
+        ma = [[] for i in range(a[2])]
+        j = k = 0
+        while j <= (n - 1):
+            fbody = f.read(4)
+            count += 1
+            s = struct.unpack("f", fbody)
+            ma[j].append(s[0])
+            k += 1
+            if (k == (p+q+1)):
+                k = 0
+                j += 1
+        print (count)
+        j=0
+        b=[0]*a[2]
+        while j<(a[2]):
+            fbody2 =f.read(4)
+            s=struct.unpack("f",fbody2)
+            b[j]=s[0]
+            j+=1
+        if(f.read(4)):
+            print ("数据没有用完")
+        else:
+            print ("数据已经用完")
+        for aaa in ma:
+            print (aaa)
+        gaussPP2(ma,b,p,q,version)
+def choleskyb(aa,n,q,p,b):
+    """
+    本函数针对给定带宽为p的对称正定矩阵A计算其Cholesky矩阵G，其元存放于A的相应位置
+    :param aa: 对阵正定带状矩阵
+    :param n: 矩阵的阶数
+    :param p: 矩阵的带宽
+    """
     a=aa[:]
-    n = len(a)
-    for k in range(1, n):
-        max = 0
-        maxi=0
-        print (a[0][0])
-        for s in range(k,n):
-            if(a[s][k]>max):
-                maxi=s
-        if(a[maxi][k]==0):
-            print ("主元为零")
-        temp =a[k][:]
-        a[k]=a[maxi][:]
-        a[maxi]=temp[:]
-        for i in range(k+1,n):
-            a[i][k]=a[i][k]/a[k][k]
-            for m in range(k+1,n+1):
-                a[i][m]=a[i][m]-a[i][k]*a[k][m]
-    for aaa in aa:
+    u=[[0 for i in range(n)] for i in range(n)]
+    l=[[0 for i in range(n)] for i in range(n)]
+    for i in range(0,n):
+        temp1=n
+        if(i+q<temp1):
+            temp1=i+q+1
+        for j in range(i,temp1):
+            temp2=0
+            if(i-p>0):
+                temp2=i-p
+            if(j-q>i-p):
+                temp2=j-q
+            sum=0
+            for t in range(temp2,i):
+                sum+=l[i][t]*u[t][j]
+            u[i][j]=a[i][j]-sum
+            temp2=0
+            if(j-p>temp2):
+                temp2=j-p
+            if(i-q>temp2):
+                temp2=i-q
+            for t in range(temp2,i):
+                sum+=l[i][t]*u[t][j]
+            l[j][i]=(a[j][i]-sum)/u[i][i]
+    print("a矩阵")
+    for aaa in a:
         print(aaa)
+    print("l矩阵")
+    for lll in l:
+        print(lll)
+    print("u矩阵")
+    for uuu in u:
+        print(uuu)
 
 
+    #回代的过程
+    y=[0]*n
+    x=[0]*n
+    y[0]=b[0]
+    for k in range(1,n):
+        sum=0
+        temp=0
+        if(k-p>0):
+            temp=k-p
+        for j in range(temp,k):
+            sum+=y[j]*l[k][j]
+        y[k]=b[k]-sum
+
+    print (y)
+    x[n-1]=y[n-1]/u[n-1][n-1]
+    k=n-2
+    while k>=0:
+        sum=0
+        temp=n
+        if(k-p<n-1):
+            temp=k-p+1
+        for j in range(k+1,temp):
+            temp+=l[j][k]*x[j]
+        x[k]=(y[k]-temp)/u[k][k]
+        k-=1
+    print (x)
+
+
+def gaussPP (aa,bb,p,q,version):
+
+    a=aa[:][:]
+    b=bb[:][:]
+    n = len(a)
+    for k in range(0, n):
+        max = abs(a[k][k])
+        maxi=k
+        # for s in range(k+1,n):
+        #     if(abs(a[s][k])>max):
+        #         max=abs(a[s][k])
+        #         maxi=s
+        if(max==0):
+            print ("主元为零")
+        if(k!=maxi):
+            temp =a[k][:]
+            a[k]=a[maxi][:]
+            a[maxi]=temp[:]
+            tempb=b[k]
+            b[k]=b[maxi]
+            b[maxi]=tempb
+            print ("进行主元交换")
+            print ("该",k,"迭代的主元是",max,"位于第",maxi,"行")
+        temp=n
+        if(k+p<n):
+            temp=k+p+1
+        for i in range(k+1,temp):
+            a[i][k]=a[i][k]/a[k][k]
+            temp2=n
+            if(temp2>k+q):
+                temp2=k+q+1
+            for m in range(k+1,temp2):
+                a[i][m]=a[i][m]-a[i][k]*a[k][m]
+            b[i]=b[i]-a[i][k]*b[k]
+    #回代的过程
+    print ("开始回带")
+    x=[0]*n
+    x[n-1]=b[n-1]/a[n-1][n-1]
+    k=n-2
+    while k>=0:
+        temp=0
+        for j in range(k+1,n):
+            temp+=a[k][j]*x[j]
+        x[k]=(b[k]-temp)/a[k][k]
+        k-=1
+    print (x)
+    print ("x的个数",len(x))
+
+def gaussPP2(aa,bb,p,q,version):
+    a=aa[:][:]
+    b=bb[:][:]
+    m = len(a)
+    n= len(a[0])
+    for k in range(0, m):
+        max = abs(a[k][0])
+        maxi=k
+        # for s in range(k+1,n):
+        #     if(abs(a[s][k])>max):
+        #         max=abs(a[s][k])
+        #         maxi=s
+        if(max==0):
+            print ("主元为零")
+        if(k!=maxi):
+            temp =a[k][:]
+            a[k]=a[maxi][:]
+            a[maxi]=temp[:]
+            tempb=b[k]
+            b[k]=b[maxi]
+            b[maxi]=tempb
+            print ("进行主元交换")
+            print ("该",k,"迭代的主元是",max,"位于第",maxi,"行")
+        temp=n
+        if(k+p<n):
+            temp=k+p+1
+        for i in range(k+1,temp):
+            a[i][k+p-i]=a[i][k+p-i]/a[k][p]
+            temp2=n
+            if(temp2>k+q):
+                temp2=k+q+1
+            for m in range(k+1,temp2):
+                a[i][m+p-i]=a[i][m+p-i]-a[i][k+p-i]*a[k][m+p-k]
+            b[i]=b[i]-a[i][+p-i]*b[k]
+    #回代的过程
+    print ("开始回带")
+    x=[0]*n
+    x[n-1]=b[n-1]/a[n-1][p]
+    k=n-2
+    while k>=0:
+        temp=0
+        for j in range(k+1,n):
+            temp+=a[k][j]*x[j]
+        x[k]=(b[k]-temp)/a[k][k]
+        k-=1
+    print (x)
+    print ("x的个数",len(x))
 
 
 def question3 ():
     # 选择数据文件
-    pathArray = ["dat61.dat"]
+    pathArray = ["dat62.dat"]
     for path in pathArray:
         printDataInfo(path)
 
