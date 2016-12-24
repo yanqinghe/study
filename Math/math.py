@@ -4,6 +4,8 @@
 import binascii
 import struct
 
+#定义sgn函数
+sgn = lambda x:1 if x>0 else -1 if x <0 else 0
 
 def dd (tup_x, tup_y):
     n = len(tup_x)
@@ -144,18 +146,40 @@ def question1 ():
     plt.show()
 
 
-def lss ():
-    """形成矩阵"""
-
-
 def question2 ():
-    x = range(0, 25)
+    x = range(25)
     y = [15, 14, 14, 14, 14, 15, 16, 18, 20, 20, 23, 25, 28, 31, 34, 31, 29, 27, 25, 24, 22, 20, 18, 17, 16]
-    plt.figure(figsize=(8, 4))
-    plt.plot(np.array(x), np.array(y), '*', label="$data$", color="red")
-    plt.ylim(10, 40)
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(8, 4))
+    # plt.plot(np.array(x), np.array(y), '*', label="$data$", color="red")
+    # plt.ylim(10, 40)
+    # plt.legend()
+    # plt.show()
+    print (x)
+    n=len(x)
+    w=[0]*n
+    m=2
+    g=initG(x,m)
+    c=[0]*(m+1)
+    b=c[:]
+    #建立矩阵Qk
+    for k in range(0,m):
+        for i in range(k,len(x)):
+            c[k]=g[k]^2+c[k]
+        c[k]=-sgn(g[k][k]*(c(k)**0.5))
+        w[k]=g[k,k]-c[k]
+        for j in range(k+1,n):
+            w[j]=g[j][k]
+        b=c[k]*w[k]
+        #变化G
+        g[k][k]=c[k]
+        for
+def initG(x,n):
+    g=[[] for i in range(len(x))]
+    for i in range(len(x)):
+        for j in range(n+1):
+            g[i].append(x[i]**j)
+    for xxx in g:
+        print (xxx)
 
 
 def printDataInfo (path):
@@ -425,5 +449,5 @@ def question3 ():
 
 
 # question1()
-# question2()
-question3()
+question2()
+#question3()
