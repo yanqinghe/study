@@ -109,7 +109,7 @@ def evaspline (xxArray, tup_x, tup_y):
         xdian = xx - tup_x[k - 1]
         yy = (M[k - 1] * (xbar ** 3) / 6 + M[k] * (xdian ** 3) / 6 + (tup_y[k - 1] - M[k - 1] * (h ** 2) / 6) * xbar + (
         tup_y[k] - (M[k] * h ** 2) / 6) * xdian) / h
-
+        ss = M[k-1]*xbar**2/(2*h)+M[k]*xdian**2/(2*h)+(yy[k]-yy[k-1])/h-(M[k]-M[k-1])*h/6;
         yyArray.append(yy)
     return yyArray
 
@@ -135,6 +135,7 @@ def question1 ():
     yyArray = evaspline(xxArray, x, y)
     printArrayASJson(xxArray, yyArray)
     yyArray2 = ni(xxArray, x, y)
+
     # printArrayASJson(xxArray,yyArray)
     #
     plt.figure(figsize=(8, 4))
