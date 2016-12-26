@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# import numpy as np
+import numpy as np
 # import matplotlib.pyplot as plt
 import binascii
 import struct
@@ -16,7 +16,7 @@ def dd (tup_x, tup_y):
         while j >= i:
             m[j] = (m[j] - m[j - 1]) / (tup_x[j] - tup_x[j - i])
             j -= 1
-            print(m[j], i, j)
+            # print(m[j], i, j)
     return m
 
 
@@ -74,7 +74,7 @@ def splinem (x, y, lambda_0, d_0, u_n, d_n):
     #         M[i] = (M[i] - M[i - 1]) / (x[i] - x[i - k])
     #         i -= 1
     for i in range(1, 3):
-        j = n - 1;
+        j = n - 1
         while j >= i:
             M[j] = (M[j] - M[j - 1]) / (x[j] - x[j - i])
             j -= 1
@@ -100,7 +100,9 @@ def evaspline (xxArray, tup_x, tup_y):
     # printArrayASJson(tup_x[xx],tup_y[xx])
     # M = splinem(tup_x, tup_y, 0.5, 0, 0.5, 0)
     M = splinem(tup_x, tup_y, -2, -0.0392, -2, -0.018)
+    ss=[]
     yyArray = []
+    l=[0]*(len(xxArray)+1)
     for xx in xxArray:
         yy = 0
         k = find_k(tup_x, xx)
@@ -109,8 +111,12 @@ def evaspline (xxArray, tup_x, tup_y):
         xdian = xx - tup_x[k - 1]
         yy = (M[k - 1] * (xbar ** 3) / 6 + M[k] * (xdian ** 3) / 6 + (tup_y[k - 1] - M[k - 1] * (h ** 2) / 6) * xbar + (
         tup_y[k] - (M[k] * h ** 2) / 6) * xdian) / h
-        ss = M[k-1]*xbar**2/(2*h)+M[k]*xdian**2/(2*h)+(yy[k]-yy[k-1])/h-(M[k]-M[k-1])*h/6;
         yyArray.append(yy)
+        ss.append(-M[k-1]*(xbar**2)/(2*h)+M[k]*(xdian**2)/(2*h)+(tup_y[k]-tup_y[k-1])/h-(M[k]-M[k-1])*h/6)
+
+    for j in range(len(xxArray)):
+        l[j+1]+=(1+ss[j]**2)**0.5*(20/len(xxArray))
+    print (l[len(xxArray)])
     return yyArray
 
 
@@ -130,21 +136,25 @@ def question1 ():
     xxArray = []
     while xx <= 20:
         xxArray.append(xx)
-        xx += 0.01
+        xx += 0.2
 
     yyArray = evaspline(xxArray, x, y)
-    printArrayASJson(xxArray, yyArray)
+    l=0
+    for i in range(1,len(xxArray)):
+        l+=((yyArray[i]-yyArray[i-1])**2+(xxArray[i]-xxArray[i-1])**2)**0.5
+    print("电缆的长度",l)
+    # printArrayASJson(xxArray, yyArray)
     yyArray2 = ni(xxArray, x, y)
 
     # printArrayASJson(xxArray,yyArray)
     #
-    plt.figure(figsize=(8, 4))
-    plt.plot(np.array(xxArray), np.array(yyArray), label="$yangtiao$", color="blue")
-    plt.plot(np.array(xxArray), np.array(yyArray2), label="$duoxiangs$", color="red")
-    plt.plot(np.array(x), np.array(y), '*', label="$data$", color="black")
-    plt.ylim(0, 20)
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(8, 4))
+    # plt.plot(np.array(xxArray), np.array(yyArray), label="$yangtiao$", color="blue")
+    # plt.plot(np.array(xxArray), np.array(yyArray2), label="$duoxiangs$", color="red")
+    # plt.plot(np.array(x), np.array(y), '*', label="$data$", color="black")
+    # plt.ylim(0, 20)
+    # plt.legend()
+    # plt.show()
 
 
 def question2 ():
@@ -156,31 +166,56 @@ def question2 ():
     # plt.legend()
     # plt.show()
     print (x)
-    n=len(x)
-    w=[0]*n
-    m=2
-    g=initG(x,m)
-    c=[0]*(m+1)
-    b=c[:]
+    m=len(x)
+
+    w=[0]*m
+    n=4
+    g=initG(x,y,n)
+    c=[0]*(n+1)
+    a=[0]*(n+1)
+    b=[0]*m
     #建立矩阵Qk
-    for k in range(0,m):
-        for i in range(k,len(x)):
-            c[k]=g[k]^2+c[k]
-        c[k]=-sgn(g[k][k]*(c(k)**0.5))
-        w[k]=g[k,k]-c[k]
-        for j in range(k+1,n):
+    for k in range(0,n+1):
+        for i in range(k,m):
+            c[k]=g[i][k]**2+c[k]
+        c[k]=-sgn(g[k][k])*(c[k]**0.5)
+        w[k]=g[k][k]-c[k]
+        for j in range(k+1,m):
             w[j]=g[j][k]
-        b=c[k]*w[k]
+        b[k]=c[k]*w[k]
         #变化G
         g[k][k]=c[k]
-        for
-def initG(x,n):
+        for j in range(k+1,n+2):
+            sum=0
+            for i in range(k,m):
+                sum+=w[i]*g[i][j]
+            t=sum/b[k]
+            for i in range(k,m):
+                g[i][j]=g[i][j]+t*w[i]
+    #解三角方程组
+    a[n]=g[n][n+1]/g[n][n]
+    i = n-1
+    while i>=0:
+        sum=0
+        for j in range(i+1,n+1):
+            sum+=g[i][j]*a[j]
+        a[i]=(g[i][n+1]-sum)/g[i][i]
+        i-=1
+    e2=0
+    for t in range(n+1,m):
+        e2+=g[t][n+1]**2
+    e2=e2**0.5
+    print (e2)
+
+def initG(x,y,n):
     g=[[] for i in range(len(x))]
     for i in range(len(x)):
         for j in range(n+1):
             g[i].append(x[i]**j)
+        g[i].append(y[i])
     for xxx in g:
         print (xxx)
+    return g
 
 
 def printDataInfo (path):
@@ -206,10 +241,8 @@ def printDataInfo (path):
     print ("带状矩阵下带宽", p)
     print ("------------------")
     # f.seek(0,3)
-
-
-
     if(version=='0x102'):
+        print ("矩阵为未压缩带状矩阵")
         count = 0
         ma = [[] for i in range(a[2])]
         j = k = 0
@@ -222,7 +255,8 @@ def printDataInfo (path):
             if (k == (a[2])):
                 k = 0
                 j += 1
-        print (count)
+        if(count==n**2):
+            print ("矩阵数据正确")
         j=0
         b=[0]*a[2]
         while j<(a[2]):
@@ -250,7 +284,8 @@ def printDataInfo (path):
             if (k == (p+q+1)):
                 k = 0
                 j += 1
-        print (count)
+        if(count==n*(p+q+1)):
+            print ("矩阵数据正确")
         j=0
         b=[0]*a[2]
         while j<(a[2]):
@@ -262,9 +297,8 @@ def printDataInfo (path):
             print ("数据没有用完")
         else:
             print ("数据已经用完")
-        for aaa in ma:
-            print (aaa)
-        gaussPP2(ma,b,p,q,version)
+        gaussPP2(ma,b,p,q)
+
 def choleskyb(aa,n,q,p,b):
     """
     本函数针对给定带宽为p的对称正定矩阵A计算其Cholesky矩阵G，其元存放于A的相应位置
@@ -335,8 +369,48 @@ def choleskyb(aa,n,q,p,b):
         k-=1
     print (x)
 
+def gaussPP (aa,bb):
+    a=aa[:][:]
+    b=bb[:][:]
+    n = len(a)
+    for k in range(0, n):
+        max = abs(a[k][k])
+        maxi=k
+        # for s in range(k+1,n):
+        #     if(abs(a[s][k])>max):
+        #         max=abs(a[s][k])
+        #         maxi=s
+        if(max==0):
+            print ("主元为零")
+        if(k!=maxi):
+            temp =a[k][:]
+            a[k]=a[maxi][:]
+            a[maxi]=temp[:]
+            tempb=b[k]
+            b[k]=b[maxi]
+            b[maxi]=tempb
+            print ("进行主元交换")
+            print ("该",k,"迭代的主元是",max,"位于第",maxi,"行")
+        for i in range(k+1,n):
+            a[i][k]=a[i][k]/a[k][k]
+            for m in range(k+1,n):
+                a[i][m]=a[i][m]-a[i][k]*a[k][m]
+            b[i]=b[i]-a[i][k]*b[k]
+    #回代的过程
+    print ("开始回带")
+    x=[0]*n
+    x[n-1]=b[n-1]/a[n-1][n-1]
+    k=n-2
+    while k>=0:
+        temp=0
+        for j in range(k+1,n):
+            temp+=a[k][j]*x[j]
+        x[k]=(b[k]-temp)/a[k][k]
+        k-=1
+    print (x)
+    print ("x的个数",len(x))
 
-def gaussPP (aa,bb,p,q,version):
+def gaussPP1 (aa,bb,p,q):
 
     a=aa[:][:]
     b=bb[:][:]
@@ -384,13 +458,21 @@ def gaussPP (aa,bb,p,q,version):
     print (x)
     print ("x的个数",len(x))
 
-def gaussPP2(aa,bb,p,q,version):
+def gaussPP2(aa,bb,p,q):
+    """
+    对带状压缩矩阵进行高斯消去法
+    :param aa:系数矩阵A
+    :param bb:矩阵b
+    :param p:带宽p
+    :param q:带宽q
+    :param version:
+    """
     a=aa[:][:]
     b=bb[:][:]
     m = len(a)
     n= len(a[0])
     for k in range(0, m):
-        max = abs(a[k][0])
+        max = abs(a[k][p])
         maxi=k
         # for s in range(k+1,n):
         #     if(abs(a[s][k])>max):
@@ -407,27 +489,27 @@ def gaussPP2(aa,bb,p,q,version):
             b[maxi]=tempb
             print ("进行主元交换")
             print ("该",k,"迭代的主元是",max,"位于第",maxi,"行")
-        temp=n
-        if(k+p<n):
+        temp=m
+        if((k+p)<temp):
             temp=k+p+1
         for i in range(k+1,temp):
             a[i][k+p-i]=a[i][k+p-i]/a[k][p]
-            temp2=n
-            if(temp2>k+q):
-                temp2=k+q+1
-            for m in range(k+1,temp2):
-                a[i][m+p-i]=a[i][m+p-i]-a[i][k+p-i]*a[k][m+p-k]
-            b[i]=b[i]-a[i][+p-i]*b[k]
+            for j in range(k+1,k+q+1):
+                a[i][j+p-i]=a[i][j+p-i]-a[i][k+p-i]*a[k][j+p-k]
+            b[i]=b[i]-a[i][k+p-i]*b[k]
     #回代的过程
     print ("开始回带")
-    x=[0]*n
-    x[n-1]=b[n-1]/a[n-1][p]
-    k=n-2
+    x=[0]*m
+    x[m-1]=b[m-1]/a[m-1][p]
+    k=m-2
     while k>=0:
-        temp=0
-        for j in range(k+1,n):
-            temp+=a[k][j]*x[j]
-        x[k]=(b[k]-temp)/a[k][k]
+        temp=b[k]
+        st2=m
+        if ((k+q)<st2):
+            st2=k+q+1
+        for j in range(k+1,st2):
+            temp-=a[k][j+p-k]*x[j]
+        x[k]=temp/a[k][p]
         k-=1
     print (x)
     print ("x的个数",len(x))
@@ -435,20 +517,10 @@ def gaussPP2(aa,bb,p,q,version):
 
 def question3 ():
     # 选择数据文件
-    pathArray = ["dat62.dat"]
+    pathArray = ["dat64.dat"]
     for path in pathArray:
         printDataInfo(path)
 
-        # 读取数据文件
-
-        # a = fh.read()
-        # print 'raw: ',`a`,type(a)
-        # hexstr = binascii.b2a_hex(a)  #得到一个16进制的数
-        # print ('hex: ',hexstr, type(hexstr))
-        # bsstr = bin(int(hexstr,16))[2:]
-        # print('bin: ',bsstr, type(bsstr))
-
-
-# question1()
-question2()
+question1()
+#question2()
 #question3()
