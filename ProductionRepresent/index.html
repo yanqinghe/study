@@ -1,0 +1,94 @@
+<html>
+
+<head>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="http://apps.bdimg.com/libs/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/bootstrap-table.min.js"></script>
+
+    <!-- Latest compiled and minified Locales -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.0/locale/bootstrap-table-zh-CN.min.js"></script>
+
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet" />
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <script src="./assets/js/extensions/bootstrap-table-editable.js"></script>
+    <script src="./assets/js/my.js"></script>
+    <script>
+    </script>
+</head>
+
+<body>
+
+    <div class="mostused-packages well well-sm text-center hidden-xs hidden-sm">
+        <ul class="list-inline">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default" onclick="getLocalValue()" value="">读取</button>
+                <button type="button" class="btn btn-default" onclick="storeData()" value="">保存</button >
+				<button type="button" class="btn btn-default" onclick="removeTable()" value="">清除</button>
+                <button type="button" class="btn btn-default" onclick="storeDataToServer()" value="">保存到云</button>
+                <button type="button" class="btn btn-primary" onclick="editFa()">修改因数水平内容</button>
+                <button type="button" class="btn btn-default" onclick="table2()" value="">正交表方差计算</button>
+            </div>
+        </ul>
+    </div>
+    <div class="container protocal-notice">
+        <div class="row">
+            <div class="col-xs-12 hidden-xs">
+                <div class="form-inline pull-right"><label>选择已有的正交表模版：</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							正交表模板 <span class="caret"></span>
+						</button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a onclick="tableMode(2,3,this)">2水平3因素</a></li>
+                            <li><a onclick="tableMode(2,7,this)">2水平7因数</a></li>
+                            <li><a onclick="tableMode(2,11,this)">2水平11因素</a></li>
+                            <li class="divider"></li>
+                            <li><a onclick="tableMode(3,4,this)">3水平4因数</a></li>
+                            <li class="divider"></li>
+                            <li><a onclick="tableMode(4,5,this)">4水平5因数</a></li>
+                            <li class="divider"></li>
+                            <li><a onclick="tableMode(5,6,this)">5水平6因数</a></li>
+                        </ul>
+                    </div>
+                    <a href="http://blog.bootcdn.cn/bootcdn-support-https/" target="_blank" onclick="_hmt.push(['_trackEvent', 'notice', 'click', 'protocal-notice'])">了解详情 <i class="fa fa-info-circle"></i></a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">修改表头</h4>
+                </div>
+                <div class="modal-body">
+                    <table id="table3"></table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">重置</button>
+                    <button type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <main class="packages-list-container" id="all-packages">
+        <div class="container">
+            <table id="table"> </table>
+            <table id="table2"></table>
+        </div>
+    </main>
+</body>
+
+</html>
